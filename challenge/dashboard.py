@@ -18,6 +18,8 @@ from plotly.subplots import make_subplots
 
 import numpy as np
 
+
+#boring stuff for creating the app blahblhabla
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 
@@ -35,8 +37,10 @@ air_density = 0
 #just the layout of tab1
 def get_tab_1_content():
     return html.Div([
+        #title
         html.H1("Projectile Motion", style={'text-align': 'center'}),
 
+        #dropdown for selecting tasks
         dcc.Dropdown(id={'type': 'slct_task', 'index': 0},
                     options=[
                         {"label": "Task 1", "value": 1},
@@ -52,11 +56,16 @@ def get_tab_1_content():
                         multi=False,
                         value=1,
                         style={'width': "40%"}),
-                    
+
+        #empty box for buggy purpose       
         html.Div(id={'type': 'output_container', 'index': 0}, children=[]),
         html.Br(),
+
+        #adds a graph in dash
         dcc.Graph(id={'type': 'plot', 'index': 0}, figure={'layout': {'clickmode': 'event+select'}}, config={'staticPlot': False}),
+        #html div for displaying all the parameters
         html.Div(id='Options',children=[
+            #initial velocity slider
             html.Div(id={'type': 'u_container', 'index': 0},children=[
                 html.Label("Initial Velocity"),
 
@@ -67,7 +76,7 @@ def get_tab_1_content():
                 value = 10
                 )],
                 style={'display': 'block'}),
-            
+            #more sliders
             html.Div(id={'type': 'high/low_v_container', 'index': 0},children=[
                 html.Label("High/Low ball additional velocity"),
 
@@ -78,6 +87,8 @@ def get_tab_1_content():
                 value = 1
                 )],
                 style={'display': 'none'}),
+
+            #more sliders
             html.Div(id={'type': 'g_container', 'index': 0},children=[
                 html.Label("Gravitational Acceleration"),
 
@@ -89,6 +100,7 @@ def get_tab_1_content():
                 )],
                 style={'display': 'block'}),
 
+            #more sliders theta=angle of launch
             html.Div(id={'type': 'theta_container', 'index': 0},children=[
                 html.Label("Start Angle (degrees)"),
 
@@ -100,6 +112,7 @@ def get_tab_1_content():
                 )],
                 style={'display': 'block'}),
 
+            #more sliders - C = constant of restitution for bouncing businesses
             html.Div(id={'type': 'C_container', 'index': 0},children=[
                 html.Label("Constant of Restitution"),
 
@@ -111,6 +124,7 @@ def get_tab_1_content():
                 )],
                 style={'display': 'block'}),
             
+            #starting height slider
             html.Div(id={'type': 'h_container', 'index': 0},children=[
                 html.Label("Starting Height"),
 
@@ -131,14 +145,21 @@ def get_tab_1_content():
 #layout of tab 2
 def get_tab_2_content():
    return html.Div([
+       #title for tab 2
         html.H1("Extension Projectile", style={'text-align': 'center'}),
 
+        #same weird div that i need to have
         html.Div(id={'type': 'output_container', 'index': 1}, children=[]),     
         html.Br(),
+
+        #row for aligning both parameters and plot side by side
         dbc.Row([
+            #graph
             dbc.Col(dcc.Graph(id={'type': 'plot', 'index': 1}, figure={'layout': {'clickmode': 'event+select'}}, config={'staticPlot': False}), width=8),
             
+            #parameters sliders
             dbc.Col(html.Div(id={'type': 'parameters', 'index': 1}, children=[
+                        #sliders
                         html.Div(id={'type': 'u_container', 'index': 1},children=[
                             html.Label("Initial Velocity"),
 
@@ -149,7 +170,7 @@ def get_tab_2_content():
                             value = 10
                             )],
                             style={'display': 'block'}),
-
+                        #sliders
                         html.Div(id={'type': 'g_container', 'index': 1},children=[
                             html.Label("Gravitational Acceleration"),
 
@@ -160,7 +181,7 @@ def get_tab_2_content():
                             value = 9.8
                             )],
                             style={'display': 'block'}),
-
+                        #more sliders
                         html.Div(id={'type': 'theta_container', 'index': 1},children=[
                             html.Label("Start Angle (degrees)"),
 
@@ -171,7 +192,7 @@ def get_tab_2_content():
                             value = 60
                             )],
                             style={'display': 'block'}),
-                        
+                        #more sliders
                         html.Div(id={'type': 'h_container', 'index': 1},children=[
                             html.Label("Starting Height"),
 
@@ -182,6 +203,7 @@ def get_tab_2_content():
                             value = 0.7
                             )],
                             style={'display': 'block'}),
+                        #more sliders
                         html.Div(children=[
                             dcc.Checklist(['Target Location'], id={'type': 'target_location', 'index': 1}),
                             html.Div(id={'type': 'target_container', 'index': 1}, children=[
@@ -189,6 +211,7 @@ def get_tab_2_content():
                                 dcc.Input(id={'type': 'target_location_y', 'index': 1}, type='number', placeholder='Y position')
                             ], style={'dipslay': 'none'})
                             ]),
+                        #more sliders
                         html.Div(children=[
                             dcc.Checklist(['Air Resistance'], id={'type': 'air_resistance_check', 'index': 1}),
                             html.Div(id={'type': 'air_resistance_parameters', 'index': 1}, children=[
@@ -230,6 +253,7 @@ def render_parameters(task):
     high_low_v_container = {'display': 'none'}
     C_container = {'display': 'none'}
     
+    #essentially just sets the display of each slider depending on the current task
     match task:
         case 3:
             u_container = {'display': 'none'}
@@ -256,6 +280,8 @@ def render_parameters(task):
 def render_tab_2_parameters(target_pos, air_resistance):
     global targetx, targety
 
+
+    #renders each paramet depending on some checkboxes eg target_pos and if air_resistance
     target_container_style = {'display': 'block'}
     air_resistance_style = {'display': 'none'}
     air_resistance_val = 0
@@ -270,7 +296,7 @@ def render_tab_2_parameters(target_pos, air_resistance):
     return target_container_style, targetx, targety, air_resistance_style, air_resistance_val
 
 
-#used to render all graphs
+#used to render all graphs - callbacks basically take inputs and outputs of all the different components used in def update_tab_graphs(...)
 @app.callback(
     [Output(component_id={'type': 'output_container', 'index': MATCH}, component_property='children'),
      Output(component_id={'type': 'plot', 'index': MATCH}, component_property='figure'),
@@ -294,15 +320,19 @@ def render_tab_2_parameters(target_pos, air_resistance):
 )
 def update_tab_graphs(tab, task_values, initial_v, gravity, theta, high_low_v_values, C_values, h, clickData, targetx, targety, air_density):
     if tab=='tab_1':
+        #returns the tab1graphs values
         task=task_values[0] if task_values else no_update
         h_l_v = high_low_v_values[0] if high_low_v_values else no_update
         C = C_values[0] if C_values else no_update
 
         return update_tab1_graphs(task, initial_v, gravity, theta, h_l_v, C, h, clickData)
     elif tab=='tab_2':
+        #otherwise returns the tab2 values
+
+        #for setting a target for the projectile
         tx = targetx[0] if targetx != [] and targetx != [None] else None
         ty = targety[0] if targety != [] and targety != [None] else None
-
+        
 
         return update_tab_2_graphs(initial_v, gravity, theta, h, clickData, tx, ty, air_density)
     else:
@@ -310,18 +340,21 @@ def update_tab_graphs(tab, task_values, initial_v, gravity, theta, high_low_v_va
 
 #used to update tab1
 def update_tab1_graphs(task, initial_v, gravity, theta, high_low_v, C, h, clickData):
+    #creates a graph figure
     fig = go.Figure()
     lines = []
     title = html.H2(f"Task {task}", style={'text-align': 'center'})
 
     # xlim = 45
     # ylim = 15
+    #renders graph lines depending on task
     match task:
         case 1:
             lines.append([c1.get_values(u=initial_v, g=gravity, theta=np.deg2rad(theta), h=h)])
         case 2:
             lines.append([c2.get_values(u=initial_v, g=gravity, theta=np.deg2rad(theta), h=h)])
         case 3:
+            #task 3 uses clicking to mark target point so some setup for that
             fig.add_trace(go.Scatter(x=np.repeat(np.linspace(0, 100, 20), 20), y=np.tile(np.linspace(0, 60, 20), 20), mode='markers', marker=dict(opacity=0), showlegend=False))
 
             targetx, targety = 100, 30
@@ -346,12 +379,14 @@ def update_tab1_graphs(task, initial_v, gravity, theta, high_low_v, C, h, clickD
                 lines.append([line])
             lines.append([c5.get_values(g=gravity, u=initial_v, h=h)])
         case 6:
+            #multiple lines in case 6 so some extra stuff for that
             for line in c4.get_values(g = gravity, u = initial_v, theta=np.deg2rad(theta), h=h):
                 angle = float(line[2][0:4])
                 s = c4.calculate_distance(g=gravity, u=initial_v, theta=np.deg2rad(angle), x=max(line[0]))
                 line[2] += f' Total Distance covered by projectile: {np.round(s, 2)}'
                 lines.append([line])
         case 7:
+            #case 7 involves multiple graphs so thats why its so messy
             fig = make_subplots(1, 2)
             c7values = c7.get_values(g=gravity, u=initial_v, h=h)
             for x, y, t, r, angle in c7values[0]:
@@ -377,6 +412,7 @@ def update_tab1_graphs(task, initial_v, gravity, theta, high_low_v, C, h, clickD
 
             return title, fig, initial_v, theta
         case 8:
+            
             xpos, ypos = c8.get_values(gIN=gravity, u=initial_v, theta=np.deg2rad(theta), C=C, h=h)
             fig = c8.build_animation(xpos, ypos)
 
@@ -405,11 +441,15 @@ def update_tab1_graphs(task, initial_v, gravity, theta, high_low_v, C, h, clickD
 
 #used to update tab 2
 def update_tab_2_graphs(initial_v, gravity, theta, h, clickData, targetx, targety, air_density):
-
+    #creates graph
     fig = go.Figure()
+
+    #establish some variables blahblah
     v_new=initial_v
     theta_new = theta
     ad = None
+
+    #air density input is basically a list of all previous inputs so needs to take the most recent - for setting air density with air resistance
     if air_density != []:
         ad = air_density[0]
     if ad:
@@ -418,9 +458,9 @@ def update_tab_2_graphs(initial_v, gravity, theta, h, clickData, targetx, target
         x2, y2, _ = advalues[1]
         x, y, _ = advalues[0]
         fig.add_trace(go.Scatter(x=x2, y=y2, name='Air resistance model'))    
+    
+    #if there are targets selected:
     if targetx != None and targety != None:
-
-        
         fig.add_trace(go.Scatter(x=[targetx], y=[targety], mode='markers', name='Target Position'))
         
         values, v_new, theta_new = c3.get_values(g=gravity, targetx=targetx, targety=targety, extra_v=0, h=h)
