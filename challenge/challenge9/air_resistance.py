@@ -3,12 +3,19 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.patches import Circle
 
-
+#used to create a trajectory based on air resistance
 def get_values(g=9.81, u=30, theta=np.deg2rad(45), h=2, air_density=1):
+    #g = gravitional acceleration
+    #u = initial velocity
+    #theta = launch angle
+    #h = starting height
+    #air density
+    #dt = time step
     dt = 0.01
 
     drag_coefficient = 0.1
     cross_sectional_area = 0.001
+    #m = mass of projectile
     m = 0.01
 
 
@@ -23,12 +30,13 @@ def get_values(g=9.81, u=30, theta=np.deg2rad(45), h=2, air_density=1):
 
     ax2, ay2 = 0, 0
 
-
-    print(air_density)
+    #k = a constant used for calculating drag using the equation:
     k = (0.5 * drag_coefficient * air_density * cross_sectional_area) / m
+
 
     x1, x2, y1, y2 = [], [], [], []
 
+    #verlet method iteratively works out acceleration, positions, velocities at each time step
     while y2_pos >= 0:
 
         ax2 = -(v2_x / v2) * k * v2**2
