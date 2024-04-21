@@ -24,7 +24,8 @@ app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.layout = html.Div([
     dcc.Tabs(id='tabs', value='tab_1', children=[
         dcc.Tab(label='Tasks', value='tab_1'),
-        dcc.Tab(label='Extension', value='tab_2')
+        dcc.Tab(label='Extension', value='tab_2'),
+        dcc.Tab(label='Extension 2', value='tab_3')
     ]), html.Div(id='tab_content')
 ])
 
@@ -224,6 +225,15 @@ def get_tab_2_content():
         )
     ])
 
+def get_tab_3_content():
+    return html.Div([
+        html.H1("The Earth lol"),
+
+        html.Div(id='three-js-container'),
+
+        html.Iframe(src='/assets/3d-components/index.html', style={"height": "600px", "width": "100%"})
+    ])
+
 
 #used to render whether the tab is 1 or 2
 @app.callback(
@@ -231,10 +241,13 @@ def get_tab_2_content():
         [Input(component_id='tabs', component_property='value')]
 )
 def render_tabs(tab):
-    if tab=='tab_1':
-        return get_tab_1_content()
-    elif tab=='tab_2':
-        return get_tab_2_content()
+    match tab:
+        case 'tab_1':
+            return get_tab_1_content()
+        case 'tab_2':
+            return get_tab_2_content()
+        case 'tab_3':
+            return get_tab_3_content()
 
 
 #renders the different parameters (sets them to visible or invisible)
