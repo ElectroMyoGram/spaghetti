@@ -8,11 +8,9 @@ import challenge8.bouncing_ball as c8
 import challenge9.air_resistance as c9
 
 import dash
-from dash import dcc
+from dash import dcc, html, no_update
 import dash_bootstrap_components as dbc
-from dash import html
 from dash.dependencies import Input, Output, ALL, State, MATCH, ALLSMALLER
-from dash import no_update
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
