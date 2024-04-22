@@ -464,7 +464,6 @@ def update_tab_2_graphs(initial_v, gravity, theta, h, clickData, targetx, target
     if air_density != []:
         ad = air_density[0]
     if ad:
-        print(ad)
         advalues= c9.get_values(g=gravity, u=initial_v, theta=np.deg2rad(theta), h=h, air_density=ad)
         x2, y2, _ = advalues[1]
         x, y, _ = advalues[0]
