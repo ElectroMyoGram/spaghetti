@@ -231,7 +231,7 @@ def get_tab_3_content():
 
         html.Div(id='three-js-container'),
 
-        html.Iframe(src='/assets/3d-components/index.html', style={"height": "600px", "width": "100%"})
+        html.Iframe(src='/assets/3d-components/index.html', style={"height": "400px", "width": "100%"})
     ])
 
 
