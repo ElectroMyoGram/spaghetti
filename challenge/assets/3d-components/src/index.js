@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import GUI from 'dat.gui'
 
 const EARTH_AXIS_OF_ROTATION = 23.5;
 const ROTATION_SPEED = 0.0001;
 const LINE_COLOUR = 0xffff00;
 
-// Initializes the Three.js scene
 function initThreeScene() {
     // Scene setup
     const scene = new THREE.Scene();
@@ -27,7 +27,7 @@ function initThreeScene() {
     controls.update();
 
     // Earth's rotation axis
-    const earthAxis = new THREE.Vector3(1, Math.tan(EARTH_AXIS_OF_ROTATION * Math.PI / 180), 0);
+    const earthAxis = new THREE.Vector3(0, Math.tan(EARTH_AXIS_OF_ROTATION * Math.PI / 180), 0);
 
     // Axis visualization
     const arrowHelper = new THREE.ArrowHelper(earthAxis.clone().normalize(), new THREE.Vector3(0, 0, 0), 10, LINE_COLOUR);
