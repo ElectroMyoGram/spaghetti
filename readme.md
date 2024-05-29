@@ -4,5 +4,6 @@ pip install dash
 pip install dash-bootstrap-components
 pip install numpy
 pip install matplotlib
+pip install scipy
 
 that should work main file is dashboard.py idk why i didn't call it main long story

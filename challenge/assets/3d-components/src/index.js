@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import GUI from 'dat.gui'
+import { GUI } from 'dat.gui'
 
 const EARTH_AXIS_OF_ROTATION = 23.5;
 const ROTATION_SPEED = 0.0001;
@@ -41,6 +41,11 @@ function initThreeScene() {
         renderer.render(scene, camera);
     }
     animate();
+}
+
+
+function setup_gui(){
+    const gui = new GUI()
 }
 
 // Set the scene to initialize when the window loads
