@@ -500,6 +500,7 @@ def update_tab_2_graphs(initial_v, gravity, theta, h, clickData, targetx, target
     #air density input is basically a list of all previous inputs so needs to take the most recent - for setting air density with air resistance
 
     if constant_atmosphere_check != [] and constant_atmosphere_check != [None]:
+        graph_size = 1.25
         match constant_atmosphere_check[0]:
             case 1:
                 if air_density != []:
@@ -509,14 +510,14 @@ def update_tab_2_graphs(initial_v, gravity, theta, h, clickData, targetx, target
             case 2:
                 ad = atmosphere.get_values()
                 advalues= c9.get_values(g=gravity, u=initial_v * atmospheric_multiplier[0], theta=np.deg2rad(theta), h=h, air_density=ad, atmosphere=True)
-                fig = atmosphere_heatmap.get_values(ad[0], ad[1], max(advalues[1][0]), max(advalues[1][1]))
+                fig = atmosphere_heatmap.get_values(ad[0], ad[1], max(advalues[1][0])*graph_size, max(advalues[1][1])*graph_size)
                 
         x2, y2, _ = advalues[1]
         x, y, _ = advalues[0]
         fig.add_trace(go.Scatter(x=x2, y=y2, name='Air resistance model'))
         fig.add_trace(go.Scatter(x=x, y=y, name='No air resistance model'))
-        fig.update_xaxes(range=[0, max(x2)])
-        fig.update_yaxes(range=[0, max(y2)])
+        fig.update_xaxes(range=[0, max(x2)*graph_size])
+        fig.update_yaxes(range=[0, max(y2)*graph_size])
         fig.update_layout(xaxis_title="X (m)", yaxis_title="Y (m)")
 
         return no_update, fig, v_new, theta_new
