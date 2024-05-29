@@ -18,32 +18,33 @@ def get_values(g=9.81):
     R = 8.314
 
     lapse_rate_keys = {k * 1000: v/1000 for k, v in lapse_rate_def.items()}
-
-    def lapse_rate(h):
-        for index, height in enumerate(lapse_rate_keys.keys()):
-            if h < (height):
-                return lapse_rate_keys[list(lapse_rate_keys.keys())[index-1]]
-        return lapse_rate_keys[list(lapse_rate_keys.keys())[-1]]
-
-
-
-    da = 80
     altitudes = np.linspace(0, 80000, 50)
 
+
+    def lapse_rate(h):
+        keys = np.array(list(lapse_rate_keys.keys()))
+        index = np.searchsorted(keys, h, side="right") - 1
+        return list(lapse_rate_keys.values())[index]
+
     def air_density(alti):
-        ans = []
+        # ans = []
         
-        for h in alti:
-            L = lapse_rate(h)
-            if L != 0:
-                term1 = (M * g) / (L * R)
-                term2 = 1 - ( (L * h) / T0 )
-                rho_term = R0 * (term2 ** term1)
+        # for h in alti:
+        #     L = lapse_rate(h)
+        #     if L != 0:
+        #         term1 = (M * g) / (L * R)
+        #         term2 = 1 - ( (L * h) / T0 )
+        #         rho_term = R0 * (term2 ** term1)
                 
-            else:
-                rho_term = R0 * np.exp(-( ( M * g * h) / (R * T0)))
-            ans.append(rho_term)
-        return ans
+        #     else:
+        #         rho_term = R0 * np.exp(-( ( M * g * h) / (R * T0)))
+        #     ans.append(rho_term)
+        # return ans
+        L = np.vectorize(lapse_rate)(alti)
+        term1 = (M * g) / (L * R)
+        term2 = 1 - ((L * alti) / T0)
+        rho_term = np.where(L != 0, R0 * (term2 ** term1), R0 * np.exp(-((M * g * alti)) / R * T0))
+        return rho_term
     # rho = []
     # T = T0
     # for i in altitudes:

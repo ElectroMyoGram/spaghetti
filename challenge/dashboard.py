@@ -313,8 +313,8 @@ def render_parameters(task):
          Output(component_id={'type': 'atmospheric_multiplier_container', 'index': MATCH}, component_property='style')
          ],
         [Input(component_id={'type': 'target_location', 'index': ALL}, component_property='value'),
-         Input(component_id={'type': 'air_resistance_check', 'index': ALL}, component_property='value')],
-         Input(component_id={'type': 'constant/atmospheric-air-resistance-check', 'index': MATCH}, component_property='value')
+         Input(component_id={'type': 'air_resistance_check', 'index': ALL}, component_property='value'),
+         Input(component_id={'type': 'constant/atmospheric-air-resistance-check', 'index': MATCH}, component_property='value'),]
 )
 def render_tab_2_parameters(target_pos, air_resistance, constant_air_density_check):
     global targetx, targety
@@ -362,12 +362,13 @@ def render_tab_2_parameters(target_pos, air_resistance, constant_air_density_che
      Input(component_id={'type': 'plot', 'index': MATCH}, component_property='clickData'),
      Input(component_id={'type': 'target_location_x', 'index': ALL}, component_property='value'),
      Input(component_id={'type': 'target_location_y', 'index': ALL}, component_property='value'),
+     Input(component_id={'type': 'air_resistance_check', 'index': ALL}, component_property='value'),
      Input(component_id={'type': 'air_density_input', 'index': ALL}, component_property='value'),
      Input(component_id={'type': 'constant/atmospheric-air-resistance-check', 'index': ALL}, component_property='value'),
      Input(component_id={'type': 'atmospheric_multiplier_input', 'index': ALL}, component_property='value'),
      ]
 )
-def update_tab_graphs(tab, task_values, initial_v, gravity, theta, high_low_v_values, C_values, h, clickData, targetx, targety, air_density, constant_atmosphere_check, atmospheric_multiplier):
+def update_tab_graphs(tab, task_values, initial_v, gravity, theta, high_low_v_values, C_values, h, clickData, targetx, targety, air_resistance_check, air_density, constant_atmosphere_check, atmospheric_multiplier):
     if tab=='tab_1':
         #returns the tab1graphs values
         task=task_values[0] if task_values else no_update
@@ -383,7 +384,7 @@ def update_tab_graphs(tab, task_values, initial_v, gravity, theta, high_low_v_va
         ty = targety[0] if targety != [] and targety != [None] else None
         
 
-        return update_tab_2_graphs(initial_v, gravity, theta, h, clickData, tx, ty, air_density, constant_atmosphere_check, atmospheric_multiplier)
+        return update_tab_2_graphs(initial_v, gravity, theta, h, clickData, tx, ty, air_resistance_check, air_density, constant_atmosphere_check, atmospheric_multiplier)
     else:
         return no_update, no_update, no_update, no_update
 
@@ -489,7 +490,7 @@ def update_tab1_graphs(task, initial_v, gravity, theta, high_low_v, C, h, clickD
     return title, fig, initial_v, theta
 
 #used to update tab 2
-def update_tab_2_graphs(initial_v, gravity, theta, h, clickData, targetx, targety, air_density, constant_atmosphere_check, atmospheric_multiplier):
+def update_tab_2_graphs(initial_v, gravity, theta, h, clickData, targetx, targety, air_resistance_check, air_density, constant_atmosphere_check, atmospheric_multiplier):
     #creates graph
     fig = go.Figure()
 
@@ -499,28 +500,31 @@ def update_tab_2_graphs(initial_v, gravity, theta, h, clickData, targetx, target
     ad = None
     #air density input is basically a list of all previous inputs so needs to take the most recent - for setting air density with air resistance
 
-    if constant_atmosphere_check != [] and constant_atmosphere_check != [None]:
+    if air_resistance_check == [['Air Resistance']]:
+        print(air_resistance_check)
         graph_size = 1.25
         match constant_atmosphere_check[0]:
             case 1:
                 if air_density != []:
                     ad = air_density[0]
                     advalues= c9.get_values(g=gravity, u=initial_v, theta=np.deg2rad(theta), h=h, air_density=ad)
+                    x2, y2, _ = advalues[1]
+                    fig.add_trace(go.Scatter(x=x2, y=y2, name='Air resistance model'))
 
             case 2:
                 ad = atmosphere.get_values()
                 advalues= c9.get_values(g=gravity, u=initial_v * atmospheric_multiplier[0], theta=np.deg2rad(theta), h=h, air_density=ad, atmosphere=True)
                 fig = atmosphere_heatmap.get_values(ad[0], ad[1], max(advalues[1][0])*graph_size, max(advalues[1][1])*graph_size)
                 
-        x2, y2, _ = advalues[1]
-        x, y, _ = advalues[0]
-        fig.add_trace(go.Scatter(x=x2, y=y2, name='Air resistance model'))
-        fig.add_trace(go.Scatter(x=x, y=y, name='No air resistance model'))
-        fig.update_xaxes(range=[0, max(x2)*graph_size])
-        fig.update_yaxes(range=[0, max(y2)*graph_size])
-        fig.update_layout(xaxis_title="X (m)", yaxis_title="Y (m)")
+                x2, y2, _ = advalues[1]
+                x, y, _ = advalues[0]
+                fig.add_trace(go.Scatter(x=x2, y=y2, name='Air resistance model'))
+                fig.add_trace(go.Scatter(x=x, y=y, name='No air resistance model'))
+                fig.update_xaxes(range=[0, max(x2)*graph_size])
+                fig.update_yaxes(range=[0, max(y2)*graph_size])
+                fig.update_layout(xaxis_title="X (m)", yaxis_title="Y (m)")
 
-        return no_update, fig, v_new, theta_new
+                return no_update, fig, v_new, theta_new
     
     #if there are targets selected:
     if targetx != None and targety != None:

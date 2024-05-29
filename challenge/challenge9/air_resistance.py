@@ -1,10 +1,8 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
-from matplotlib.patches import Circle
-
+# from numba import jit
 
 #used to create a trajectory based on air resistance
+# @jit(nopython=True)
 def get_values(g=9.81, u=30, theta=np.deg2rad(45), h=2, air_density=1, atmosphere=False):
     #g = gravitional acceleration
     #u = initial velocity
@@ -12,9 +10,7 @@ def get_values(g=9.81, u=30, theta=np.deg2rad(45), h=2, air_density=1, atmospher
     #h = starting height
     #air density
     #dt = time step
-    dt = 0.01
-    if atmosphere:
-        dt = 0.001
+    dt = 0.001 if atmosphere else 0.01
 
 
 
@@ -31,17 +27,13 @@ def get_values(g=9.81, u=30, theta=np.deg2rad(45), h=2, air_density=1, atmospher
     v2_x = np.cos(theta) * u
     v2 = u
 
-    print(v2_y)
-    print(v2_x)
     x_pos, y_pos = 0, h
     x2_pos, y2_pos = 0, h
 
     ax2, ay2 = 0, 0
 
     #k = a constant used for calculating drag using the equation:
-    if not atmosphere:
-        k = (0.5 * drag_coefficient * air_density * cross_sectional_area) / m
-
+    k = (0.5 * drag_coefficient * air_density * cross_sectional_area) / m if not atmosphere else None
 
     x1, x2, y1, y2 = [0], [0], [h], [h]
 
@@ -72,6 +64,7 @@ def get_values(g=9.81, u=30, theta=np.deg2rad(45), h=2, air_density=1, atmospher
 
         y2.append(y2_pos)
         x2.append(x2_pos)
+
 
     return ((x1, y1, "No air resistance"),(x2, y2, "Air resistance"))
 # plt.plot(x1, y1, linewidth=1)
