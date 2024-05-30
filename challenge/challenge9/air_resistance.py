@@ -1,4 +1,5 @@
 import numpy as np
+import asyncio
 # from numba import jit
 
 #used to create a trajectory based on air resistance
@@ -65,6 +66,7 @@ def get_values(g=9.81, u=30, theta=np.deg2rad(45), h=2, air_density=1, atmospher
         y2.append(y2_pos)
         x2.append(x2_pos)
 
+        # await asyncio.sleep(0)
 
     return ((x1, y1, "No air resistance"),(x2, y2, "Air resistance"))
 # plt.plot(x1, y1, linewidth=1)

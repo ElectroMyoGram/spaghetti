@@ -50,6 +50,9 @@ def get_values(g=9.81, u=10, h=2):
     # plt.plot(x, low_ball_y, label="Low ball", linewidth=1)
 
     #calculate bounding parabola using equation
+
+    max_x = np.round(np.sqrt(( (2 * u**2) / g) * (h + (u**2 / (2*g)))), 0)
+    x = np.arange(0, max_x, dt)
     bounding_parabola_y = (u**2 / (2 * g)) - ((g / (2 * u **2)) * x**2) + h
     # plt.plot(x, bounding_parabola_y, label='Bounding parabola', linewidth=1)
     return x, bounding_parabola_y, 'Bounding parabola'

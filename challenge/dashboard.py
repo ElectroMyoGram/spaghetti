@@ -17,7 +17,7 @@ import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
 import numpy as np
-
+import asyncio
 
 
 #boring stuff for creating the app blahblhabla
@@ -53,8 +53,7 @@ def get_tab_1_content():
                         {"label": "Task 6", "value": 6},
                         {"label": "Task 7", "value": 7},
                         {"label": "Task 8", "value": 8},
-                        {"label": "Task 9", "value": 9},
-                        {"label": "Extension", "value": 10}],
+                        {"label": "Task 9", "value": 9}],
                         multi=False,
                         value=1,
                         style={'width': "40%"}),
@@ -428,6 +427,7 @@ def update_tab1_graphs(task, initial_v, gravity, theta, high_low_v, C, h, clickD
             for line in c4.get_values(g = gravity, u = initial_v, theta=np.deg2rad(theta), h=h):
                 lines.append([line])
             lines.append([c5.get_values(g=gravity, u=initial_v, h=h)])
+
         case 6:
             #multiple lines in case 6 so some extra stuff for that
             for line in c4.get_values(g = gravity, u = initial_v, theta=np.deg2rad(theta), h=h):
@@ -486,6 +486,7 @@ def update_tab1_graphs(task, initial_v, gravity, theta, high_low_v, C, h, clickD
     
     fig.update_layout(clickmode='event+select')
     fig.update_layout(xaxis_title="X (m)", yaxis_title="Y (m)")
+
 
     return title, fig, initial_v, theta
 
