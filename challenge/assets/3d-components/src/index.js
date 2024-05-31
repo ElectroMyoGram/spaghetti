@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GUI } from 'dat.gui'
+import {Earth } from './earth.js'
 
 const EARTH_AXIS_OF_ROTATION = 23.5;
 const ROTATION_SPEED = 0.0001;
@@ -15,12 +16,16 @@ function initThreeScene() {
     document.body.appendChild(renderer.domElement);
 
     // Earth texture and geometry
-    const sphereTexture = new THREE.TextureLoader().load('/assets/textures/earth.jpg');
-    const sphereGeometry = new THREE.SphereGeometry(1);
-    const material = new THREE.MeshBasicMaterial({ map: sphereTexture });
-    const earth = new THREE.Mesh(sphereGeometry, material);
-    scene.add(earth);
+    let earth = new Earth();
+    scene.add(earth.earth_sphere);
 
+    //lines of latitude
+    let linesOfLatitude = earth.generate_latitude_lines(25);
+    linesOfLatitude.forEach((line) => {scene.add(line);});
+
+    //lines of longitude
+    let linesOfLongitude = earth.generate_longitude_lines(50);
+    linesOfLongitude.forEach((line) => scene.add(line));
     // Camera and controls
     camera.position.z = 5;
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -37,7 +42,7 @@ function initThreeScene() {
     function animate() {
         requestAnimationFrame(animate);
         
-        earth.rotateOnAxis(earthAxis, ROTATION_SPEED);
+        earth.earth_sphere.rotateOnAxis(earthAxis, ROTATION_SPEED);
         renderer.render(scene, camera);
     }
     animate();
@@ -48,5 +53,5 @@ function setup_gui(){
     const gui = new GUI()
 }
 
-// Set the scene to initialize when the window loads
+
 window.onload = initThreeScene;

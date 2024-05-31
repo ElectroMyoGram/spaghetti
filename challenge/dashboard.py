@@ -502,7 +502,6 @@ def update_tab_2_graphs(initial_v, gravity, theta, h, clickData, targetx, target
     #air density input is basically a list of all previous inputs so needs to take the most recent - for setting air density with air resistance
 
     if air_resistance_check == [['Air Resistance']]:
-        print(air_resistance_check)
         graph_size = 1.25
         match constant_atmosphere_check[0]:
             case 1:
