@@ -9,8 +9,6 @@ export class Earth{
         this.material = new THREE.MeshBasicMaterial({ map: this.sphereTexture });
         this.earth_sphere = new THREE.Mesh(this.sphereGeometry, this.material);
 
-        this.nlat = 180
-        this.nlong = 360
 
         this.lineMaterial = new THREE.LineBasicMaterial({
             color: 0x0000ff,
@@ -64,8 +62,6 @@ export class Earth{
         return lines;
 
     }
-    get_wire_mesh(){
 
-    }
 }
 
