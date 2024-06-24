@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GUI } from 'dat.gui'
-import {Earth } from './earth.js'
+import {Earth } from './earth.js';
+import {Marker} from './marker.js';
 
 const EARTH_AXIS_OF_ROTATION = 23.5;
 const ROTATION_SPEED = 0.0001;
@@ -14,6 +14,9 @@ function initThreeScene() {
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
+
+    let current_marker1 = null;
+
 
     // Earth texture and geometry
     let earth = new Earth();
@@ -38,6 +41,17 @@ function initThreeScene() {
     const arrowHelper = new THREE.ArrowHelper(earthAxis.clone().normalize(), new THREE.Vector3(0, 0, 0), 10, LINE_COLOUR);
     scene.add(arrowHelper);
 
+
+
+    window.addEventListener('click', function(mouse){
+        let mouse_check = earth.check_mouse_intersection(mouse.clientX, mouse.clientY, window, camera);
+        if (mouse_check != null){
+            console.log(mouse_check.point);
+            current_marker1 = place_marker(mouse_check.point, scene, current_marker1);
+            
+        };
+
+    })
     // Animation loop
     function animate() {
         requestAnimationFrame(animate);
@@ -48,10 +62,12 @@ function initThreeScene() {
     animate();
 }
 
-
-function setup_gui(){
-    const gui = new GUI()
+function place_marker(position, scene, current){
+    if (current) current.kill(scene);
+    let marker = new Marker(position);
+    marker.sphere.position.set(position.x, position.y, position.z)
+    scene.add(marker.sphere);
+    return marker;
 }
-
 
 window.onload = initThreeScene;

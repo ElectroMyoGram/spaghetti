@@ -1,7 +1,7 @@
 import plotly.graph_objs as go
 import numpy as np
 
-
+#just used to display the changing air resistance as a temperature map on the graph
 def get_values(h, rho, max_x, max_y):
     X = np.linspace(0, max_x, 50)
     Y = np.linspace(0, max_y, 50)

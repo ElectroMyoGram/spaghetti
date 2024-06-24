@@ -319,7 +319,7 @@ def render_tab_2_parameters(target_pos, air_resistance, constant_air_density_che
     global targetx, targety
 
 
-    #renders each paramet depending on some checkboxes eg target_pos and if air_resistance
+    #renders each parameter depending on some checkboxes eg target_pos and if air_resistance
     target_container_style = {'display': 'block'}
     air_resistance_style = {'display': 'none'}
     constant_air_resistance_val = 0
@@ -499,12 +499,13 @@ def update_tab_2_graphs(initial_v, gravity, theta, h, clickData, targetx, target
     v_new=initial_v
     theta_new = theta
     ad = None
-    #air density input is basically a list of all previous inputs so needs to take the most recent - for setting air density with air resistance
 
+    #air resistance case
     if air_resistance_check == [['Air Resistance']]:
-        graph_size = 1.25
+        graph_size = 1.25 #used to inflate the graph past values (temporary)
         match constant_atmosphere_check[0]:
             case 1:
+                #constant air density
                 if air_density != []:
                     ad = air_density[0]
                     advalues= c9.get_values(g=gravity, u=initial_v, theta=np.deg2rad(theta), h=h, air_density=ad)
@@ -512,6 +513,7 @@ def update_tab_2_graphs(initial_v, gravity, theta, h, clickData, targetx, target
                     fig.add_trace(go.Scatter(x=x2, y=y2, name='Air resistance model'))
 
             case 2:
+                #atmospheric type air density
                 ad = atmosphere.get_values()
                 advalues= c9.get_values(g=gravity, u=initial_v * atmospheric_multiplier[0], theta=np.deg2rad(theta), h=h, air_density=ad, atmosphere=True)
                 fig = atmosphere_heatmap.get_values(ad[0], ad[1], max(advalues[1][0])*graph_size, max(advalues[1][1])*graph_size)

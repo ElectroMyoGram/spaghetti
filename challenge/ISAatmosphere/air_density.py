@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
+#different temeperature lapse rate at each point in atmosphere
 lapse_rate_def = {0: -6.5, 
                   11.0: 0.0, 
                   20.0: 1.0, 
@@ -27,29 +27,13 @@ def get_values(g=9.81):
         return list(lapse_rate_keys.values())[index]
 
     def air_density(alti):
-        # ans = []
-        
-        # for h in alti:
-        #     L = lapse_rate(h)
-        #     if L != 0:
-        #         term1 = (M * g) / (L * R)
-        #         term2 = 1 - ( (L * h) / T0 )
-        #         rho_term = R0 * (term2 ** term1)
-                
-        #     else:
-        #         rho_term = R0 * np.exp(-( ( M * g * h) / (R * T0)))
-        #     ans.append(rho_term)
-        # return ans
+        #faster way of utilizing lapse rate by vectorizing it (chat gpt told me)
         L = np.vectorize(lapse_rate)(alti)
+        #goofy equation to work out changing density after some rearraging and integrating of 
         term1 = (M * g) / (L * R)
         term2 = 1 - ((L * alti) / T0)
         rho_term = np.where(L != 0, R0 * (term2 ** term1), R0 * np.exp(-((M * g * alti)) / R * T0))
         return rho_term
-    # rho = []
-    # T = T0
-    # for i in altitudes:
-    #     L = lapse_rate(i)
-    #     T += L * (da / 1000)
-    #     rho.append(T-273)
+
     rho = air_density(altitudes)
     return altitudes, rho
