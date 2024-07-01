@@ -58,7 +58,12 @@ export class Projectile{
     calculate_initial_velocity(){
         return this.initial_position.clone().normalize().multiplyScalar(this.launch_speed);
     }
-    reset() {
+    reset(scene) {
+        scene.remove(this.arrowHelper1);
+        scene.remove(this.arrowHelper2);
+        scene.remove(this.arrowHelper3);
+        this.initial_velocity = this.calculate_initial_velocity();
+
         this.position.copy(this.initial_position);
         this.velocity.copy(this.initial_velocity);
         this.applyRotation();

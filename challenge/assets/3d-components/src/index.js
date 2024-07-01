@@ -28,6 +28,8 @@ function initThreeScene() {
     let iterateBtn;
     let iterateSteps;
     let line_parabola;
+    let initial_v_param;
+    let initial_theta_param;
 
 
 
@@ -66,21 +68,27 @@ function initThreeScene() {
                 gui.remove(markerPositionUIY);
                 gui.remove(iterateBtn);
                 gui.remove(iterateSteps);
+                gui.remove(initial_v_param);
+                gui.remove(initial_theta_param);
             }
             console.log(mouse_check.point);
             current_marker1 = place_marker(mouse_check.point, scene, current_marker1);
             markerToPlace = 0;
             markerPositionUIX = gui.add(current_marker1.sphere.position, 'x').name('Xpos');
             markerPositionUIY = gui.add(current_marker1.sphere.position, 'y').name('Ypos');
+            initial_v_param = gui.add(current_marker1.pr, 'launch_speed', 1, 1000).name('Launch Speed');
+            initial_theta_param = gui.add(current_marker1.pr, 'launch_angle', 0, Math.PI / 2).name('Launch Angle')
+            
             iterateBtn = gui.add({buttonText: function() {
                 if (line_parabola){
                     scene.remove(line_parabola)
                 }
-                current_marker1.pr.reset();
+                current_marker1.pr.reset(scene);
                 line_parabola = current_marker1.pr.iterate();
                 scene.add(line_parabola);
+
             }}, 'buttonText').name('Iterate by TimeStep');
-            iterateSteps = gui.add(current_marker1.pr, 'numIterations', 10, 10000).name('Number of Iterations')
+            iterateSteps = gui.add(current_marker1.pr, 'numIterations', 10, 500000).name('Number of Iterations')
 
 
             
