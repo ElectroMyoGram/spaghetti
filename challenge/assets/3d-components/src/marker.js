@@ -17,6 +17,12 @@ export class Marker{
     kill(scene){
         this.sphere.geometry.dispose();
         this.sphere.material.dispose();
+        this.pr.sphere.geometry.dispose();
+        this.pr.sphere.material.dispose();
+        scene.remove(this.pr.arrowHelper1);
+        scene.remove(this.pr.arrowHelper2);
+        scene.remove(this.pr.arrowHelper3);
+        scene.remove(this.pr.sphere);
         scene.remove(this.sphere);
     }
 

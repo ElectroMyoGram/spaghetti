@@ -7,7 +7,6 @@ import {Marker} from './marker.js';
 
 const EARTH_AXIS_OF_ROTATION = 23.5;
 const ROTATION_SPEED = 0.0001;
-const LINE_COLOUR = 0xffff00;
 
 
 
@@ -27,6 +26,8 @@ function initThreeScene() {
     let markerPositionUIX;
     let markerPositionUIY;
     let iterateBtn;
+    let iterateSteps;
+    let line_parabola;
 
 
 
@@ -62,19 +63,25 @@ function initThreeScene() {
         if (mouse_check != null && markerToPlace != 0){
             if (markerPositionUIX){
                 gui.remove(markerPositionUIX);
-            };
-            if (markerPositionUIY){
                 gui.remove(markerPositionUIY);
-            };
-            if (iterateBtn){
                 gui.remove(iterateBtn);
+                gui.remove(iterateSteps);
             }
             console.log(mouse_check.point);
             current_marker1 = place_marker(mouse_check.point, scene, current_marker1);
             markerToPlace = 0;
             markerPositionUIX = gui.add(current_marker1.sphere.position, 'x').name('Xpos');
             markerPositionUIY = gui.add(current_marker1.sphere.position, 'y').name('Ypos');
-            iterateBtn = gui.add({buttonText: function() {current_marker1.pr.iterate();}}, 'buttonText').name('Iterate by TimeStep');
+            iterateBtn = gui.add({buttonText: function() {
+                if (line_parabola){
+                    scene.remove(line_parabola)
+                }
+                current_marker1.pr.reset();
+                line_parabola = current_marker1.pr.iterate();
+                scene.add(line_parabola);
+            }}, 'buttonText').name('Iterate by TimeStep');
+            iterateSteps = gui.add(current_marker1.pr, 'numIterations', 10, 10000).name('Number of Iterations')
+
 
             
         };
@@ -84,10 +91,10 @@ function initThreeScene() {
     function animate() {
         requestAnimationFrame(animate);
         earth.earth_sphere.rotateOnAxis(earthAxis, ROTATION_SPEED);
-        if (current_marker1){
-            current_marker1.pr.iterate();
+        // if (current_marker1){
+        //     current_marker1.pr.iterate();
 
-        }
+        // }
         renderer.render(scene, camera);
     }
     animate();
@@ -101,6 +108,12 @@ function place_marker(position, scene, current){
     scene.add(marker.sphere);
     console.log(marker.pr.sphere);
     scene.add(marker.pr.sphere);
+    scene.add(marker.pr.arrowHelper1);
+    scene.add(marker.pr.arrowHelper2);
+    scene.add(marker.pr.arrowHelper3);
+
+
+
     return marker;
 }
 
