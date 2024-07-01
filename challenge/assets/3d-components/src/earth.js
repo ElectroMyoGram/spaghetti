@@ -4,7 +4,7 @@ import * as THREE from 'three';
 export class Earth{
     constructor(){
         //defines some class constants
-        this.radius = 1.0
+        this.radius = EARTH_RADIUS
         this.sphereTexture = new THREE.TextureLoader().load('/assets/textures/earth.jpg');
         this.sphereGeometry = new THREE.SphereGeometry(this.radius, 64, 32);
         this.material = new THREE.MeshBasicMaterial({ map: this.sphereTexture });

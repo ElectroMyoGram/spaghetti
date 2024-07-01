@@ -1,0 +1,3 @@
+const EARTH_RADIUS = 6371;
+const EARTH_MASS = 5.9722 * (10**24);
+const GRAVITATIONAL_CONSTANT = 6.67430 * (10 ** -11);
