@@ -23,13 +23,17 @@ function initThreeScene() {
     const gui = new GUI();
     gui.add({buttonText: function() { console.log('Button clicked'); markerToPlace = 1;} }, 'buttonText').name('Add Start Point');
     let markerToPlace = 0;
-    let markerPositionUIX;
-    let markerPositionUIY;
-    let iterateBtn;
-    let iterateSteps;
+    let params = {
+        markerPositionUIX: null,
+        markerPositionUIY: null,
+        iterateBtn: null,
+        iterateSteps: null,
+        initial_v_param: null,
+        initial_theta_param: null
+    }
+
     let line_parabola;
-    let initial_v_param;
-    let initial_theta_param;
+
 
 
 
@@ -46,7 +50,7 @@ function initThreeScene() {
     linesOfLongitude.forEach((line) => scene.add(line));
     // Camera and controls
     camera.position.z = EARTH_RADIUS * 1.5;
-    camera.far = EARTH_RADIUS * 4;
+    camera.far = EARTH_RADIUS * 8;
     camera.updateProjectionMatrix();
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.update();
@@ -63,23 +67,20 @@ function initThreeScene() {
     window.addEventListener('click', function(mouse){
         let mouse_check = earth.check_mouse_intersection(mouse.clientX, mouse.clientY, window, camera);
         if (mouse_check != null && markerToPlace != 0){
-            if (markerPositionUIX){
-                gui.remove(markerPositionUIX);
-                gui.remove(markerPositionUIY);
-                gui.remove(iterateBtn);
-                gui.remove(iterateSteps);
-                gui.remove(initial_v_param);
-                gui.remove(initial_theta_param);
+            if (params.markerPositionUIX){
+                for (let index = 0; index < Object.keys(params).length; index++){
+                    param = Object.keys(params)[index];
+                    params[param] = null;
+                }
             }
-            console.log(mouse_check.point);
             current_marker1 = place_marker(mouse_check.point, scene, current_marker1);
             markerToPlace = 0;
-            markerPositionUIX = gui.add(current_marker1.sphere.position, 'x').name('Xpos');
-            markerPositionUIY = gui.add(current_marker1.sphere.position, 'y').name('Ypos');
-            initial_v_param = gui.add(current_marker1.pr, 'launch_speed', 1, 1000).name('Launch Speed');
-            initial_theta_param = gui.add(current_marker1.pr, 'launch_angle', 0, Math.PI / 2).name('Launch Angle')
+            params.markerPositionUIX = gui.add(current_marker1.sphere.position, 'x').name('Xpos');
+            params.markerPositionUIY = gui.add(current_marker1.sphere.position, 'y').name('Ypos');
+            params.initial_v_param = gui.add(current_marker1.pr, 'launch_speed', 1, 1000).name('Launch Speed');
+            params.initial_theta_param = gui.add(current_marker1.pr, 'launch_angle', 0, Math.PI / 2).name('Launch Angle')
             
-            iterateBtn = gui.add({buttonText: function() {
+            params.iterateBtn = gui.add({buttonText: function() {
                 if (line_parabola){
                     scene.remove(line_parabola)
                 }
@@ -87,8 +88,13 @@ function initThreeScene() {
                 line_parabola = current_marker1.pr.iterate();
                 scene.add(line_parabola);
 
+                //rotate earth
+                let rotationAmount = 15/180 * Math.PI * (1 / 3600) * current_marker1.pr.timestep * current_marker1.pr.numIterations
+                console.log('rotationAmount', rotationAmount);
+                earth.earth_sphere.rotateOnAxis(earthAxis, rotationAmount);
+
             }}, 'buttonText').name('Iterate by TimeStep');
-            iterateSteps = gui.add(current_marker1.pr, 'numIterations', 10, 500000).name('Number of Iterations')
+            params.iterateSteps = gui.add(current_marker1.pr, 'numIterations', 10, 500000).name('Num Iterations')
 
 
             
