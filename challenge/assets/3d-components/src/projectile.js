@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Atmosphere } from './atmosphere.js'
 
 
 export class Projectile{
@@ -8,14 +9,16 @@ export class Projectile{
 
         this.launch_speed = 500;
         this.mass = 1000;  
-        this.launch_angle = Math.PI / 8;
+        this.launch_angle = 45;
+        this.launch_direction = parseFloat(0.0);
         this.direction = 0;
         this.gravitational_magnitude = -9.8;
 
         this.drag_coefficient = 0.1;
 
         this.cross_sectional_area = 0.001;
-        this.air_density = 1.0;
+        this.air_density = 10.0;
+        this.atmosphere = new Atmosphere();
 
         this.k = (0.5 * this.drag_coefficient * this.air_density * this.cross_sectional_area);
 
@@ -24,6 +27,7 @@ export class Projectile{
 
         // Current state
         this.position = this.initial_position.clone();
+
         this.velocity = this.initial_velocity.clone();
         console.log(this.position, this.velocity);
         this.arrowHelper1;
@@ -33,7 +37,7 @@ export class Projectile{
         this.align_with_earth();
         this.acceleration = new THREE.Vector3(0, 0, 0);
 
-        this.radius = 100
+        this.radius = 90
 
         this.sphereGeometry = new THREE.SphereGeometry(this.radius, 8, 4);
         this.material_colour = new THREE.MeshBasicMaterial({color: 0x00ff00})
@@ -88,12 +92,15 @@ export class Projectile{
                 this.velocity.multiplyScalar(0);
             }
     
-    
-            let Fdrag = this.velocity.clone().multiplyScalar(-1 * this.k * this.velocity.clone().multiplyScalar(10**3).lengthSq())
+            let h = this.position.length() - EARTH_RADIUS;
+            if (h < 0) h = 0;
+            this.air_density = this.atmosphere.return_density(h);
+            this.k = this.calculate_k();
+            let Fdrag = this.velocity.clone().multiplyScalar(-1 * this.k * this.velocity.clone().lengthSq())
             // console.log("FDrag: ", Fdrag);
             // console.log("k: ", this.k);
             // console.log("velocity: ", this.velocity); 
-            Fdrag=new THREE.Vector3(0, 0, 0);       
+            // Fdrag=new THREE.Vector3(0, 0, 0);    
             let overall_accel = FgravityVector.add(Fdrag).multiplyScalar(1/this.mass);
             // console.log("Overall accel: ", overall_accel);
     
@@ -114,18 +121,30 @@ export class Projectile{
 
     }
 
+    calculate_k(){
+        return (0.5 * this.drag_coefficient * this.air_density * this.cross_sectional_area);
+    }
+
 
     applyRotation(){
+        let launch_angle = deg2rad(this.launch_angle)
         const arbitraryVector = new THREE.Vector3(0, -1, 0);
         const perpendicular_vector = new THREE.Vector3().crossVectors(this.velocity, arbitraryVector);
         const doubleperpendicularVector = new THREE.Vector3().crossVectors(perpendicular_vector, this.velocity);
         if (doubleperpendicularVector.y < 0){
             doubleperpendicularVector.multiplyScalar(-1);
         }
-        this.velocity.applyAxisAngle(perpendicular_vector.clone().normalize(), -(Math.PI/2 - this.launch_angle));
+        this.velocity.applyAxisAngle(perpendicular_vector.clone().normalize(), -(Math.PI/2 - launch_angle));
+        let launch_directionRad = deg2rad(this.launch_direction);
+        this.velocity.applyAxisAngle(this.position.clone().normalize(), launch_directionRad);
+
+
         this.arrowHelper1 = new THREE.ArrowHelper(this.velocity.clone().normalize(), this.position, EARTH_RADIUS, LINE_COLOUR);
         this.arrowHelper2 = new THREE.ArrowHelper(perpendicular_vector.clone().normalize(), this.position, EARTH_RADIUS, LINE_COLOUR);
         this.arrowHelper3 = new THREE.ArrowHelper(doubleperpendicularVector.clone().normalize(), this.position, EARTH_RADIUS, LINE_COLOUR);
+
+
+
     }
 
     align_with_earth(){

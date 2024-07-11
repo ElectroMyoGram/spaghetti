@@ -11,6 +11,9 @@ export class Marker{
         this.sphere = new THREE.Mesh(this.sphereGeometry, this.material_colour);
         this.sphere.name = 'marker' 
         this.pr;
+
+        this.latitude;
+        this.longitude;
         
     }
 
@@ -28,6 +31,11 @@ export class Marker{
 
     create_projectile(){
         this.pr = new Projectile(this.sphere.position.x, this.sphere.position.y, this.sphere.position.z);
+    }
+
+    calculate_long_lat(earth_rot){
+        this.latitude = rad2deg(convert_to_latitude(this.sphere.position.y, this.sphere.position.length()));
+        this.longitude = rad2deg(convert_to_longitude(this.sphere.position.x, this.sphere.position.z, earth_rot));
     }
 
 }

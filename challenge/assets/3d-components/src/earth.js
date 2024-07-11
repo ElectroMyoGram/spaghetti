@@ -18,6 +18,10 @@ export class Earth{
             transparent: true
         });
 
+        this.rotation = 0;
+
+        // this.earth_sphere.rotateZ(-deg2rad(EARTH_AXIS_OF_ROTATION));
+
         
     }
 
@@ -79,7 +83,7 @@ export class Earth{
             return intersects[0]
         }
         else{
-            return null
+            return null;
         }
     }
 

@@ -32,7 +32,7 @@ def get_values(g=9.81):
         #goofy equation to work out changing density after some rearraging and integrating of 
         term1 = (M * g) / (L * R)
         term2 = 1 - ((L * alti) / T0)
-        rho_term = np.where(L != 0, R0 * (term2 ** term1), R0 * np.exp(-((M * g * alti)) / R * T0))
+        rho_term = np.where(L != 0, R0 * (term2 ** term1), R0 * np.exp(-(M * g * alti) / (R * T0)))
         return rho_term
 
     rho = air_density(altitudes)
