@@ -3,6 +3,9 @@ const EARTH_MASS = 5.9722 * (10**24);
 const GRAVITATIONAL_CONSTANT = 6.67430 * (10 ** -11);
 const EARTH_AXIS_OF_ROTATION = 23.5;
 
+const MOON_ORBITAL_RADIUS = 3.84 * (10 ** 5);
+const MOON_RADIUS = 1740;
+
 const LINE_COLOUR = 0xffff00;
 
 const LAPSE_RATE = {

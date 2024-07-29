@@ -10,13 +10,13 @@ export class Projectile{
         this.launch_speed = 500;
         this.mass = 1000;  
         this.launch_angle = 45;
-        this.launch_direction = parseFloat(0.0);
+        this.launch_direction = 0;
         this.direction = 0;
         this.gravitational_magnitude = -9.8;
 
         this.drag_coefficient = 0.1;
 
-        this.cross_sectional_area = 0.001;
+        this.cross_sectional_area = 0.1;
         this.air_density = 10.0;
         this.atmosphere = new Atmosphere();
 
@@ -45,7 +45,7 @@ export class Projectile{
         this.sphere.name = 'projectile' 
         this.sphere.position.set(this.position.x, this.position.y, this.position.z);
 
-        this.timestep = 0.01;
+        this.timestep = 0.1;
         this.numIterations = 1000;
         
 
@@ -63,9 +63,9 @@ export class Projectile{
         return this.initial_position.clone().normalize().multiplyScalar(this.launch_speed);
     }
     reset(scene) {
-        scene.remove(this.arrowHelper1);
-        scene.remove(this.arrowHelper2);
-        scene.remove(this.arrowHelper3);
+        // scene.remove(this.arrowHelper1);
+        // scene.remove(this.arrowHelper2);
+        // scene.remove(this.arrowHelper3);
         this.initial_velocity = this.calculate_initial_velocity();
 
         this.position.copy(this.initial_position);
@@ -74,44 +74,79 @@ export class Projectile{
         this.align_with_earth();
     }
 
-    iterate(){
+    iterate(data=false){
         const dt = this.timestep
         let points = [];
 
+        let onground = true;
+
         for (let i = 0; i < this.numIterations; ++i){
-            let Fgravity = (EARTH_MASS * GRAVITATIONAL_CONSTANT) / (this.position.clone().multiplyScalar(10**3).lengthSq());
+            let Fgravity = (EARTH_MASS * GRAVITATIONAL_CONSTANT * this.mass) / (this.position.clone().multiplyScalar(10**3).lengthSq());
             // console.log("FGravity: ", Fgravity);
             // console.log("gravitational magnitude: ", this.gravitational_magnitude);
             // console.log("mass ", this.mass);
             // console.log("position_length_squared: ", this.position.lengthSq())
             // console.log("?/////////////////////////");
-            let FgravityVector = this.position.clone().multiplyScalar(-1 * Fgravity);
+            let FgravityVector = this.position.clone().normalize().multiplyScalar(-1 * Fgravity);
+
             if (this.position.length() < EARTH_RADIUS){
                 FgravityVector.multiplyScalar(0);
                 // this.velocity.clamp(new THREE.Vector3(0, 0, 0), this.position.clone().multiplyScalar(1000));
                 this.velocity.multiplyScalar(0);
+                if (!onground){
+                    if (data){
+                        return [this.position, i];
+                    }
+                    break;
+                }
             }
+            else if (onground){
+                onground = false;
+            }
+            // console.log(FgravityVector);
     
             let h = this.position.length() - EARTH_RADIUS;
             if (h < 0) h = 0;
             this.air_density = this.atmosphere.return_density(h);
             this.k = this.calculate_k();
-            let Fdrag = this.velocity.clone().multiplyScalar(-1 * this.k * this.velocity.clone().lengthSq())
-            // console.log("FDrag: ", Fdrag);
-            // console.log("k: ", this.k);
+            let velocityLengthSq = this.velocity.clone().lengthSq();
+            let FdragMagnitude = this.k * velocityLengthSq;
+            let Fdrag = this.velocity.clone().normalize().multiplyScalar(-1 * FdragMagnitude);
+            // con/d/sxog("k: ", this.k);
             // console.log("velocity: ", this.velocity); 
-            // Fdrag=new THREE.Vector3(0, 0, 0);    
-            let overall_accel = FgravityVector.add(Fdrag).multiplyScalar(1/this.mass);
+            Fdrag=new THREE.Vector3(0, 0, 0);    
+            let overall_accel = FgravityVector.add(Fdrag);
+            // console.log(overall_accel);
+            // console.log(this.mass);
+            // console.log(overall_accel.length());
+            overall_accel.multiplyScalar(1/this.mass);
+            // console.log(overall_accel.length());
+
+            
+            // console.log(overall_accel);
             // console.log("Overall accel: ", overall_accel);
-    
-            this.position.add(this.velocity.clone().multiplyScalar(dt)).add(overall_accel.clone().multiplyScalar(-0.5 * dt**2));
+            this.velocity.add(overall_accel.clone().multiplyScalar(dt));
+            // console.log('velocity length', this.velocity.length());
+            // console.log(this.position);
+            this.position.add(this.velocity.clone().multiplyScalar(dt));
+            // console.log(this.position);
+            this.position.add(overall_accel.clone().multiplyScalar(0.5 * dt**2));
+            // console.log(this.position);
             // console.log("position ", this.position);
     
-            this.velocity.add(overall_accel.clone().multiplyScalar(dt));
             // console.log("velocity: ", this.velocity);
-    
-            this.sphere.position.set(this.position.x, this.position.y, this.position.z);
-            points.push(new THREE.Vector3(this.position.x, this.position.y, this.position.z));
+
+            if (data){//skip the next step
+                continue;
+            }
+            else{
+                this.sphere.position.set(this.position.x, this.position.y, this.position.z);
+                points.push(new THREE.Vector3(this.position.x, this.position.y, this.position.z));
+            } 
+
+        }
+        if (data){
+            return [this.position, this.numIterations]
         }
         let line_geometry = new THREE.BufferGeometry().setFromPoints( points );
         let line = new THREE.Line( line_geometry, this.lineMaterial);
@@ -139,9 +174,9 @@ export class Projectile{
         this.velocity.applyAxisAngle(this.position.clone().normalize(), launch_directionRad);
 
 
-        this.arrowHelper1 = new THREE.ArrowHelper(this.velocity.clone().normalize(), this.position, EARTH_RADIUS, LINE_COLOUR);
-        this.arrowHelper2 = new THREE.ArrowHelper(perpendicular_vector.clone().normalize(), this.position, EARTH_RADIUS, LINE_COLOUR);
-        this.arrowHelper3 = new THREE.ArrowHelper(doubleperpendicularVector.clone().normalize(), this.position, EARTH_RADIUS, LINE_COLOUR);
+        // this.arrowHelper1 = new THREE.ArrowHelper(this.velocity.clone().normalize(), this.position, EARTH_RADIUS, LINE_COLOUR);
+        // this.arrowHelper2 = new THREE.ArrowHelper(perpendicular_vector.clone().normalize(), this.position, EARTH_RADIUS, LINE_COLOUR);
+        // this.arrowHelper3 = new THREE.ArrowHelper(doubleperpendicularVector.clone().normalize(), this.position, EARTH_RADIUS, LINE_COLOUR);
 
 
 

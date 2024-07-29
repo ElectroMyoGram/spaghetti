@@ -251,7 +251,7 @@ def get_tab_2_content():
 #content for tab 3
 def get_tab_3_content():
     return html.Div([
-        html.H1("The Earth lol"),
+        html.H1("Projectile motion on a sphere"),
 
         html.Div(id='three-js-container'),
 
