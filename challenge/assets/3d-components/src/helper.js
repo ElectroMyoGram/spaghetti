@@ -29,11 +29,12 @@ function convert_to_xz(long, lat, earth_rotation, h){
         long = 180 - Math.abs(long);
         x_mod = -1;
     }
+
     
     h = h * Math.cos(deg2rad(lat));
-
-    z = h * Math.sin(deg2rad(long)) * z_mod;
-    x = h * Math.cos(deg2rad(long)) * x_mod;
+    console.log(h)
+    z = h * Math.abs(Math.sin(deg2rad(long))) * z_mod;
+    x = h * Math.abs(Math.cos(deg2rad(long))) * x_mod;
     return [x, z];
 
 }

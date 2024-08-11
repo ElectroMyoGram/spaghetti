@@ -3,7 +3,7 @@ import {Projectile} from './projectile.js';
 
 
 export class Marker{
-    constructor(){
+    constructor(earth_pos){
         //defines some class constants
         // this.radius = 100
         // this.sphereGeometry = new THREE.SphereGeometry(this.radius, 8, 4);
@@ -23,6 +23,7 @@ export class Marker{
 
         this.latitude;
         this.longitude;
+        this.earth_pos = earth_pos;
         
     }
 
@@ -39,21 +40,24 @@ export class Marker{
     }
 
     create_projectile(){
-        this.pr = new Projectile(this.sprite.position.x, this.sprite.position.y, this.sprite.position.z);
+        this.pr = new Projectile(this.sprite.position.x - this.earth_pos.x, this.sprite.position.y - this.earth_pos.y, this.sprite.position.z - this.earth_pos.z, this.earth_pos);
     }
 
     calculate_long_lat(earth_rot){
-        this.latitude = rad2deg(convert_to_latitude(this.sprite.position.y, this.sprite.position.length()));
-        this.longitude = rad2deg(convert_to_longitude(this.sprite.position.x, this.sprite.position.z, earth_rot));
+        console.log('earth pos', this.earth_pos);
+        let vectorToEarth = new THREE.Vector3(this.sprite.position.x - this.earth_pos.x, this.sprite.position.y, this.sprite.position.z);
+        console.log('vectortorEarth', vectorToEarth);
+        this.latitude = rad2deg(convert_to_latitude(vectorToEarth.y, vectorToEarth.length()));
+        this.longitude = rad2deg(convert_to_longitude(vectorToEarth.x, vectorToEarth.z, earth_rot));
     }
 
     set_pos(latitude, longitude, earth_rot){
         let y = convert_to_y(latitude, EARTH_RADIUS);
         let xz = convert_to_xz(longitude, latitude, earth_rot, EARTH_RADIUS);
-        this.sprite.position.set(xz[0], y, xz[1]);
-        this.pr.initial_position = new THREE.Vector3(x, y, z);
-        console.log(this.sprite.position.length());
-        console.log(latitude, longitude);
+        this.sprite.position.set(xz[0] + this.earth_pos.x, y, xz[1]);
+        this.pr.initial_position = new THREE.Vector3(xz[0], y, xz[1]);
+        // console.log(this.sprite.position);
+        // console.log(latitude, longitude);
     }
 
 }
