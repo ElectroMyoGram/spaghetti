@@ -32,7 +32,6 @@ function convert_to_xz(long, lat, earth_rotation, h){
 
     
     h = h * Math.cos(deg2rad(lat));
-    console.log(h)
     z = h * Math.abs(Math.sin(deg2rad(long))) * z_mod;
     x = h * Math.abs(Math.cos(deg2rad(long))) * x_mod;
     return [x, z];

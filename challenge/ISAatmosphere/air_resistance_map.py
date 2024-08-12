@@ -19,6 +19,5 @@ def get_values(h, rho, max_x, max_y):
             title='Air Density'
         )
     ))
-
     
     return fig

@@ -8,7 +8,11 @@ const ATMOSPHERE_HEIGHT = 100;
 
 const MOON_ORBITAL_RADIUS = 3.84 * (10 ** 5);
 const MOON_RADIUS = 1740;
+const MOON_ORBITAL_AXIS = 5.14;
+const MOON_ORBIT_SPEED = 1.022 * 1000;
+const MOON_MASS = (7.3 * (10**22))
 
+const FRAME_ITERATIONS = 20;
 const LINE_COLOUR = 0xffff00;
 
 const LAPSE_RATE = {
@@ -26,3 +30,12 @@ const R0 = 1.225;
 const M = 0.02896;
 const R = 8.314;
 const G = 9.81;
+
+
+const PLANET_COLOURS = {
+        sun: 0xffff00,
+        mercury: 0xa85c32
+}
+
+const HYDROGEN_ATOM_WEIGHT= 1.00794*(10**-3)
+

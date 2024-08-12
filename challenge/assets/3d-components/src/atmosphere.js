@@ -44,4 +44,20 @@ export class Atmosphere{
         return rho;
 
     }
+
+    return_basic_density(h, planet_name){
+      if (planet_name == 'moon' || planet_name == 'mercury'){
+        return 0;
+      }
+      let mu = planetary_data[planet_name].mu
+      let Rspecific = R / (mu * HYDROGEN_ATOM_WEIGHT);
+      let P0 = planetary_data[planet_name].P0 * 100000;
+      let T0 = planetary_data[planet_name].T;
+
+      let rho0 = P0 / (Rspecific * T0);
+      let H = planetary_data[planet_name].H;
+      let rho = rho0 * Math.exp(-h / H);
+      console.log(rho);
+      return rho;
+    }
 }

@@ -8,8 +8,8 @@ export class Earth{
         this.sphereTexture = new THREE.TextureLoader().load('/assets/textures/earth.jpg');
         this.sphereGeometry = new THREE.SphereGeometry(this.radius, 64, 32);
         this.material = new THREE.MeshBasicMaterial({ map: this.sphereTexture });
-        this.earth_sphere = new THREE.Mesh(this.sphereGeometry, this.material);
-        this.earth_sphere.name = 'earth'
+        this.sphere = new THREE.Mesh(this.sphereGeometry, this.material);
+        this.sphere.name = 'earth'
 
 
 
@@ -20,12 +20,11 @@ export class Earth{
             transparent: true
         });
 
-        this.rotation = 0;
+        this.rotation = 0.0;
 
         this.angle = 0;
         this.period = 3600 * 24 * 365
 
-        const map = new THREE.TextureLoader().load( '/assets/textures/blue_cricle.png' )
         this.sprite_material = new THREE.SpriteMaterial({
             color: 0x0000FF,
             sizeAttenuation: false
@@ -33,14 +32,22 @@ export class Earth{
         this.sprite = new THREE.Sprite(this.sprite_material);
         this.sprite.scale.set(0.02,0.02, 1.0);
 
-        // this.earth_sphere.rotateZ(-deg2rad(EARTH_AXIS_OF_ROTATION));
+        // this.sphere.rotateZ(-deg2rad(EARTH_AXIS_OF_ROTATION));
         
         this.trailVertices = [];
-        this.trailGeometry = new THREE.BufferGeometry().setFromPoints(trailVertices);
+        this.trailGeometry = new THREE.BufferGeometry().setFromPoints(this.trailVertices);
         this.trailMaterial = new THREE.LineBasicMaterial({color : 0xffffff});
-        this.trailLine = new THREE.Line(trailGeometry, trailMaterial)
-        
-    }
+        this.trailLine = new THREE.Line(this.trailGeometry, this.trailMaterial)
+        this.counter = 0;
+        this.last_position = null;
+
+        this.mass = EARTH_MASS;
+        this.radius = EARTH_RADIUS;
+
+        this.orbit = false;
+        this.earthAxis;
+        this.axisTilt = false;
+    }   
 
     //just uses some trig to iteratively generate a bunch of lines of latitude
     generate_latitude_lines(n=180){
@@ -54,7 +61,7 @@ export class Earth{
             for (let angle=0; angle <= Math.PI * 2; angle += resolution){
                 let xpos = Math.sin(angle) * radius;
                 let zpos = Math.cos(angle) * radius;
-                points.push(new THREE.Vector3(xpos + this.earth_sphere.position.x, ypos + this.earth_sphere.position.y, zpos + this.earth_sphere.position.z));
+                points.push(new THREE.Vector3(xpos + this.sphere.position.x, ypos + this.sphere.position.y, zpos + this.sphere.position.z));
             }
             let line_geometry = new THREE.BufferGeometry().setFromPoints( points );
 
@@ -77,7 +84,7 @@ export class Earth{
                 let xpos = Math.cos(angle) * curve_radius;
                 let zpos = Math.sin(angle) * curve_radius;
 
-                points.push(new THREE.Vector3(xpos + this.earth_sphere.position.x, ypos + this.earth_sphere.position.y, zpos + this.earth_sphere.position.z));
+                points.push(new THREE.Vector3(xpos + this.sphere.position.x, ypos + this.sphere.position.y, zpos + this.sphere.position.z));
             }
             
             let line_geometry = new THREE.BufferGeometry().setFromPoints( points );
@@ -95,7 +102,7 @@ export class Earth{
         pointer.y = - (mousey / window.innerHeight) * 2 + 1;
         
         raycaster.setFromCamera( pointer, camera );
-        let intersects = raycaster.intersectObject( this.earth_sphere );
+        let intersects = raycaster.intersectObject( this.sphere );
         if (intersects.length > 0){
             return intersects[0]
         }
@@ -109,6 +116,7 @@ export class Earth{
 
 
     iterate(dt){
+
         this.angle += (dt / this.period) * Math.PI * 2;
         this.orbital_radius = this.calculate_radius(this.angle, planetary_data.earth.aAU * AU, planetary_data.earth.ecc)
         let x = this.orbital_radius * Math.cos(this.angle)
@@ -117,8 +125,26 @@ export class Earth{
         x = x * Math.cos(planetary_data.earth.beta)
 
         this.position = new THREE.Vector3(x, y, z)
-        this.earth_sphere.position.set(x, y, z);
+        this.sphere.position.set(x, y, z);
         this.sprite.position.set(x, y, z);
+        
+        if (this.last_position){
+            console.log(this.position.clone().sub(this.last_position).length() / dt)
+        }
+        if (this.counter % 10 == 0){
+            this.update_trail_line();
+        }
+        this.counter += 1;
+        this.last_position = this.position.clone()
+    }
+
+    update_trail_line(){
+        this.trailVertices.push(this.position.clone());
+        this.trailGeometry.setFromPoints(this.trailVertices);
+
+        if (this.trailVertices.length > 1000){
+            this.trailVertices.shift()
+        }
     }
 
 

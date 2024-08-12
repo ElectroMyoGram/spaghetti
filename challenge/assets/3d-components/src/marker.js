@@ -3,7 +3,7 @@ import {Projectile} from './projectile.js';
 
 
 export class Marker{
-    constructor(earth_pos){
+    constructor(planet_pos){
         //defines some class constants
         // this.radius = 100
         // this.sphereGeometry = new THREE.SphereGeometry(this.radius, 8, 4);
@@ -23,7 +23,7 @@ export class Marker{
 
         this.latitude;
         this.longitude;
-        this.earth_pos = earth_pos;
+        this.planet_pos = planet_pos;
         
     }
 
@@ -40,25 +40,38 @@ export class Marker{
     }
 
     create_projectile(){
-        this.pr = new Projectile(this.sprite.position.x - this.earth_pos.x, this.sprite.position.y - this.earth_pos.y, this.sprite.position.z - this.earth_pos.z, this.earth_pos);
+        this.pr = new Projectile(this.sprite.position.x - this.planet_pos.x, this.sprite.position.y - this.planet_pos.y, this.sprite.position.z - this.planet_pos.z, this.planet_pos);
     }
 
-    calculate_long_lat(earth_rot){
-        console.log('earth pos', this.earth_pos);
-        let vectorToEarth = new THREE.Vector3(this.sprite.position.x - this.earth_pos.x, this.sprite.position.y, this.sprite.position.z);
-        console.log('vectortorEarth', vectorToEarth);
+    calculate_long_lat(earth_rot, axisTilt){
+
+        let vectorToEarth = new THREE.Vector3(this.sprite.position.x - this.planet_pos.x, this.sprite.position.y - this.planet_pos.y, this.sprite.position.z - this.planet_pos.z);
+        if (axisTilt){
+            const angle = Math.atan2(vectorToEarth.y, vectorToEarth.z);
+            console.log(angle);
+            const h = Math.hypot(vectorToEarth.y, vectorToEarth.z);
+            console.log(h)
+            const newAngle = angle + deg2rad(EARTH_AXIS_OF_ROTATION);
+            vectorToEarth.y = h * Math.sin(newAngle);
+            vectorToEarth.z = h * Math.cos(newAngle);
+
+        }
         this.latitude = rad2deg(convert_to_latitude(vectorToEarth.y, vectorToEarth.length()));
         this.longitude = rad2deg(convert_to_longitude(vectorToEarth.x, vectorToEarth.z, earth_rot));
+        console.log(this.latitude, this.longitude);
     }
 
     set_pos(latitude, longitude, earth_rot){
+        console.log("yes")
         let y = convert_to_y(latitude, EARTH_RADIUS);
         let xz = convert_to_xz(longitude, latitude, earth_rot, EARTH_RADIUS);
-        this.sprite.position.set(xz[0] + this.earth_pos.x, y, xz[1]);
+        this.sprite.position.set(xz[0] + this.planet_pos.x, y + this.planet_pos.y, xz[1] + this.planet_pos.z);
         this.pr.initial_position = new THREE.Vector3(xz[0], y, xz[1]);
         // console.log(this.sprite.position);
         // console.log(latitude, longitude);
     }
+
+
 
 }
 

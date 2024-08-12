@@ -3,12 +3,12 @@ import { Atmosphere } from './atmosphere.js'
 
 
 export class Projectile{
-    constructor(x, y, z, earthpos){
+    constructor(x, y, z, planetpos){
         //defines some class constants
+ 
 
-
-        this.launch_speed = 500;
-        this.mass = 1000;  
+        this.launch_speed = 10;
+        this.mass = 100;  
         this.launch_angle = 45;
         this.launch_direction = 0;
         this.direction = 0;
@@ -27,26 +27,26 @@ export class Projectile{
 
         // Current state
         this.position = this.initial_position.clone();
-
-        this.velocity = this.initial_velocity.clone();
-        console.log(this.position, this.velocity);
-        this.arrowHelper1;
-        this.arrowHelper2;
-        this.arrowHelper3;
-        this.applyRotation();
-        this.align_with_earth();
-        this.acceleration = new THREE.Vector3(0, 0, 0);
-
-        this.radius = 90
-
         this.sphereGeometry = new THREE.SphereGeometry(this.radius, 8, 4);
         this.material_colour = new THREE.MeshBasicMaterial({color: 0x00ff00})
         this.sphere = new THREE.Mesh(this.sphereGeometry, this.material_colour);
         this.sphere.name = 'projectile' 
-        this.sphere.position.set(this.position.x + earthpos.x, this.position.y + earthpos.y, this.position.z + earthpos.z);
+        this.sphere.position.set(this.position.x + planetpos.x, this.position.y + planetpos.y, this.position.z + planetpos.z);
 
+        this.velocity = this.initial_velocity.clone();
+        this.arrowHelper1;
+        this.arrowHelper2;
+        this.arrowHelper3;
+        this.applyRotation();
+        this.align_with_planet();
+        this.acceleration = new THREE.Vector3(0, 0, 0);
+        console.log(this.position, this.velocity);
+
+        this.radius = 90
+
+  
         this.timestep = 0.1;
-        this.numIterations = 1000;
+        this.numIterations = 10000;
         
 
         this.lineMaterial = new THREE.LineBasicMaterial({
@@ -58,42 +58,48 @@ export class Projectile{
         this.current_path;
         this.onground = false;
 
-        this.earth_initial_pos = earthpos
+        this.planet_initial_pos = planetpos;
         
+        this.planet_radius = EARTH_RADIUS;
+        this.planet_mass;
+        this.planet_name;
+
+        this.arrowHelper1;
+        this.arrowHelper2;
+        this.arrowHelper3;
 
         
     }
 
     calculate_initial_velocity(){
         // let vectorToEarth = this.initial_position.clone().add(-this.earth_initial_pos)
-        return this.initial_position.clone().normalize().multiplyScalar(this.launch_speed);
+        return this.initial_position.clone().normalize().multiplyScalar(this.launch_speed * 1000);
     }
     reset(scene) {
         // scene.remove(this.arrowHelper1);
         // scene.remove(this.arrowHelper2);
         // scene.remove(this.arrowHelper3);
-        console.log("reset")
         this.initial_velocity = this.calculate_initial_velocity();
 
         this.position.copy(this.initial_position);
         this.velocity.copy(this.initial_velocity);
         this.applyRotation();
-        this.align_with_earth();
+        this.align_with_planet();
     }
 
+    
     iterate(data=false){
         const dt = this.timestep
         let points = [];
 
         let onground = true;
-        console.log(this.initial_position);
         for (let i = 0; i < this.numIterations; ++i){
-            let Fgravity = (EARTH_MASS * GRAVITATIONAL_CONSTANT * this.mass) / (this.position.clone().multiplyScalar(10**3).lengthSq());
+            let Fgravity = (this.planet_mass * GRAVITATIONAL_CONSTANT * this.mass) / (this.position.clone().multiplyScalar(1000).lengthSq());
             // console.log("mass ", this.mass);
             // console.log("?/////////////////////////");
             let FgravityVector = this.position.clone().normalize().multiplyScalar(-1 * Fgravity);
 
-            if (this.position.length() < EARTH_RADIUS){
+            if (this.position.length() < this.planet_radius){
                 FgravityVector.multiplyScalar(0);
                 // this.velocity.clamp(new THREE.Vector3(0, 0, 0), this.position.clone().multiplyScalar(1000));
                 this.velocity.multiplyScalar(0);
@@ -107,32 +113,34 @@ export class Projectile{
             else if (onground){
                 onground = false;
             }
-    
-            let h = this.position.length() - EARTH_RADIUS;
+            let h = this.position.length() - this.planet_radius;
             if (h < 0) h = 0;
-            this.air_density = this.atmosphere.return_density(h);
+            
+            if (this.planet_name == 'earth'){
+                this.air_density = this.atmosphere.return_density(h);
+            }
+            else {
+                this.air_density = this.atmosphere.return_basic_density(h, this.planet_name);
+            }
 
             this.k = this.calculate_k();
             let velocityLengthSq = this.velocity.clone().lengthSq();
             let FdragMagnitude = this.k * velocityLengthSq;
             let Fdrag = this.velocity.clone().normalize().multiplyScalar(-1 * FdragMagnitude);
             // con/d/sxog("k: ", this.k);
-            // Fdrag=new THREE.Vector3(0, 0, 0);    
             let overall_accel = FgravityVector.add(Fdrag);
             // console.log(overall_accel);
             // console.log(this.mass);
             // console.log(overall_accel.length());
             overall_accel.multiplyScalar(1/this.mass);
-
             
             // console.log(overall_accel);
             // console.log("Overall accel: ", overall_accel);
             this.velocity.add(overall_accel.clone().multiplyScalar(dt));
             // console.log('velocity length', this.velocity.length());
             // console.log(this.position);
-            this.position.add(this.velocity.clone().multiplyScalar(dt));
+            this.position.add(this.velocity.clone().multiplyScalar(dt/1000));
             // console.log(this.position);
-            this.position.add(overall_accel.clone().multiplyScalar(0.5 * dt**2));
             // console.log(this.position);
             // console.log("position ", this.position);
     
@@ -142,14 +150,15 @@ export class Projectile{
                 continue;
             }
             else{
-                this.sphere.position.set(this.position.x + this.earth_initial_pos.x, this.position.y, this.position.z);
-                points.push(new THREE.Vector3(this.position.x + this.earth_initial_pos.x, this.position.y, this.position.z));
+                this.sphere.position.set(this.position.x + this.planet_initial_pos.x, this.position.y + this.planet_initial_pos.y, this.position.z + this.planet_initial_pos.z);
+                points.push(new THREE.Vector3(this.sphere.position.x, this.sphere.position.y, this.sphere.position.z));
             } 
 
         }
         if (data){
-            return [this.position, this.numIterations]
+            return [this.position, -1]
         }
+        console.log(this.position.clone());
         let line_geometry = new THREE.BufferGeometry().setFromPoints( points );
         let line = new THREE.Line( line_geometry, this.lineMaterial);
         return line;
@@ -176,43 +185,41 @@ export class Projectile{
         // let vectorToEarth = this.position.clone().add(-this.earth_initial_pos)
         this.velocity.applyAxisAngle(this.position.clone().normalize(), launch_directionRad);
 
-        // this.arrowHelper1 = new THREE.ArrowHelper(this.velocity.clone().normalize(), this.position, EARTH_RADIUS, LINE_COLOUR);
-        // this.arrowHelper2 = new THREE.ArrowHelper(perpendicular_vector.clone().normalize(), this.position, EARTH_RADIUS, LINE_COLOUR);
-        // this.arrowHelper3 = new THREE.ArrowHelper(doubleperpendicularVector.clone().normalize(), this.position, EARTH_RADIUS, LINE_COLOUR);
+        this.arrowHelper1 = new THREE.ArrowHelper(this.velocity.clone().normalize(), this.sphere.position, EARTH_RADIUS, LINE_COLOUR);
+        this.arrowHelper2 = new THREE.ArrowHelper(perpendicular_vector.clone().normalize(), this.sphere.position, EARTH_RADIUS, LINE_COLOUR);
+        this.arrowHelper3 = new THREE.ArrowHelper(doubleperpendicularVector.clone().normalize(), this.sphere.position, EARTH_RADIUS, LINE_COLOUR);
 
 
 
     }
 
-    align_with_earth(){
+    align_with_planet(){
         const vecAdd = this.position.clone().normalize()
-        while (this.position.length() <= EARTH_RADIUS){
-            
+        while (this.position.length() <= this.planet_radius){
             this.position.add(vecAdd);
         }
     }
 
 
-    iterate_once(first=false, earthpos){
+    iterate_once(first=false, planetPos){
         const dt = this.timestep
 
         if (first){
             console.log("first")
             this.onground = false;
-            // this.position.add(earthpos);
+            // this.position.add(planetpos);
             // console.log(this.position);
         }
         if (this.onground){
             return
         }
     
-        let vectorToEarth = this.position.clone().add(-earthpos)
-        let Fgravity = (EARTH_MASS * GRAVITATIONAL_CONSTANT * this.mass) / (this.position.clone().multiplyScalar(10**3).lengthSq());
+        let Fgravity = (this.planet_mass * GRAVITATIONAL_CONSTANT * this.mass) / (this.position.clone().multiplyScalar(10**3).lengthSq());
         // console.log("mass ", this.mass);
         // console.log("?/////////////////////////");
         let FgravityVector = this.position.clone().normalize().multiplyScalar(-1 * Fgravity);
 
-        if (this.position.length() < EARTH_RADIUS){
+        if (this.position.length() < this.planet_radius){
             FgravityVector.multiplyScalar(0);
             // this.velocity.clamp(new THREE.Vector3(0, 0, 0), this.position.clone().multiplyScalar(1000));
             this.velocity.multiplyScalar(0);
@@ -220,10 +227,14 @@ export class Projectile{
             return
         }
 
-
-        let h = this.position.length() - EARTH_RADIUS;
-        if (h < 0) h = 0;
-        this.air_density = this.atmosphere.return_density(h);
+        if (this.planet_radius == EARTH_RADIUS){
+            let h = this.position.length() - EARTH_RADIUS;
+            if (h < 0) h = 0;
+            this.air_density = this.atmosphere.return_density(h);
+        }
+        else {
+            this.air_density = 0.0;
+        }
 
         this.k = this.calculate_k();
         let velocityLengthSq = this.velocity.clone().lengthSq();
@@ -243,14 +254,13 @@ export class Projectile{
         this.velocity.add(overall_accel.clone().multiplyScalar(dt));
         // console.log('velocity length', this.velocity.length());
         // console.log(this.position);
-        this.position.add(this.velocity.clone().multiplyScalar(dt));
+        this.position.add(this.velocity.clone().multiplyScalar(dt/1000));
         // console.log(this.position);
-        this.position.add(overall_accel.clone().multiplyScalar(0.5 * dt**2));
         // console.log(this.position);
         // console.log("position ", this.position);
 
         // console.log("velocity: ", this.velocity);
-        this.sphere.position.set(this.position.x + earthpos.x, this.position.y + earthpos.y, this.position.z + earthpos.z);
+        this.sphere.position.set(this.position.x + planetPos.x, this.position.y + planetPos.y, this.position.z + planetPos.z);
     }
 
 }
