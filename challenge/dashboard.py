@@ -545,4 +545,4 @@ def update_tab_2_graphs(initial_v, gravity, theta, h, clickData, targetx, target
 
 #run app
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
